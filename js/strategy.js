@@ -29,7 +29,7 @@
       { number: "03", name: "Keep Promises Small", summary: "Make commitments that can be finished.", text: "Prefer clear, finishable promises over vague ambition." },
       { number: "04", name: "Create Before Consuming", summary: "Put output before noise.", text: "Start the day by making progress on something that matters." },
       { number: "05", name: "Review The Map", summary: "Let reflection guide the next step.", text: "Regularly compare current action with long-term direction." },
-      { number: "06", name: "Care For The Body", summary: "Energy supports judgment.", text: "Use sleep, movement and food as foundations for better decisions." }
+      { number: "06", name: "Care For The Body", summary: "Health supports judgment.", text: "Use sleep, movement and food as foundations for better decisions." }
     ],
     careerStory: {
       title: "From curiosity to useful work",
