@@ -1,0 +1,118 @@
+{
+  "app": "Life Compass",
+  "version": 1,
+  "exportedAt": "2026-01-01T00:00:00.000Z",
+  "data": {
+    "lifeCompass.strategy": {
+      "title": "The map before action.",
+      "principle": "Strategy is the map. Execution is the sail.",
+      "northStar": "Build a meaningful career",
+      "currentSeason": "Create visible progress",
+      "careerCompass": {
+        "title": "Meaningful career direction",
+        "items": [
+          {
+            "label": "Capability",
+            "text": "Build useful skills through focused practice and visible projects."
+          },
+          {
+            "label": "Evidence",
+            "text": "Create work that demonstrates judgment, reliability and momentum."
+          },
+          {
+            "label": "Path",
+            "text": "Clarify the people, roles and places that fit the next season."
+          }
+        ]
+      },
+      "season": {
+        "title": "Create visible progress",
+        "summary": "A focused season for turning intention into small, finished pieces of work.",
+        "points": [
+          "Finish one meaningful project brief.",
+          "Publish or share one piece of visible work.",
+          "Review the week and reduce unnecessary commitments."
+        ],
+        "tags": ["Focus", "Progress", "Learning", "Review"]
+      },
+      "rules": [
+        {
+          "number": "01",
+          "name": "Protect Momentum",
+          "summary": "Make progress easy to restart.",
+          "text": "Choose small, repeatable actions that keep the important work moving."
+        },
+        {
+          "number": "02",
+          "name": "Tell The Truth",
+          "summary": "Stay honest about what is working.",
+          "text": "Use honest reflection to notice drift, friction and real progress."
+        }
+      ],
+      "careerStory": {
+        "title": "From curiosity to useful work",
+        "body": "This story is a movement from broad curiosity toward practical contribution.",
+        "points": [
+          "Where I have been: building skills, interests and self-knowledge.",
+          "Where I am now: turning direction into visible work and daily progress.",
+          "Where I am going: toward roles and projects where my strengths are useful."
+        ]
+      },
+      "longTermDirection": [
+        "Build a life and career around useful skills, clear values and visible contribution.",
+        "Create a portfolio of work that can travel ahead of introductions."
+      ]
+    },
+    "lifeCompass.dailyTasks.2026-01-01": [
+      {
+        "text": "Write project brief",
+        "done": false,
+        "projectId": null,
+        "subtaskId": null
+      },
+      {
+        "text": "Review prototype",
+        "done": false,
+        "projectId": null,
+        "subtaskId": null
+      },
+      {
+        "text": "Move for 20 minutes",
+        "done": false,
+        "projectId": null,
+        "subtaskId": null
+      }
+    ],
+    "lifeCompass.weeklyFocus.2026-01": {
+      "main": "Write project brief",
+      "secondary": "Review prototype",
+      "health": "Move for 20 minutes"
+    },
+    "lifeCompass.calendar": {
+      "2026-01-01": true
+    },
+    "lifeCompass.kanban": {
+      "Ideas": [
+        {
+          "id": "sample-review-prototype",
+          "title": "Review prototype",
+          "date": "2026-01-01",
+          "description": "Walk through the current template and note the next useful improvement.",
+          "priority": "medium",
+          "subtasks": [
+            {
+              "id": "sample-open-app",
+              "text": "Open the app locally",
+              "done": false
+            }
+          ]
+        }
+      ],
+      "This Week": [],
+      "Complete": [],
+      "Parking Lot": []
+    },
+    "lifeCompass.parkingLot": [],
+    "lifeCompass.doneLedger": []
+  }
+}

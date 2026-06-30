@@ -1,0 +1,15 @@
+# Private user data
+data/personal-strategy.json
+data/private-strategy.json
+backups/
+exports/
+*.local.json
+*.private.json
+
+# Private screenshots
+screenshots/private/
+private/
+
+# Local planning and tool state
+docs/
+.agents/
