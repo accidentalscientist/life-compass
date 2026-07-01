@@ -1,20 +1,39 @@
 # Life Compass
 
-Life Compass is a local-first personal strategy and execution dashboard built with HTML, CSS and vanilla JavaScript.
+Life Compass is a local-first personal strategy and execution dashboard built with TypeScript and Vite.
 
-The public repository contains the app template and generic demo data only. Personal strategy, tasks, rules, calendar marks and kanban items are stored locally in the user's browser with LocalStorage.
+The public repository contains the app engine and generic demo data only. Personal strategy, tasks, operating principles, calendar marks and kanban items are stored locally in the user's browser with LocalStorage.
 
 No backend. No login. No analytics. No tracking. No cloud sync.
 
 ## Run
 
-Open `index.html` directly in a browser, or serve the folder locally:
+Install dependencies:
 
 ```powershell
-python -m http.server 8000
+npm.cmd install
 ```
 
-Then visit `http://localhost:8000`.
+Start the Vite development server:
+
+```powershell
+npm.cmd run dev
+```
+
+Then open the local URL shown by Vite, usually:
+
+```text
+http://localhost:5173
+```
+
+## Build
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run build
+```
+
+The production build is written to `dist/`.
 
 ## Pages
 
@@ -22,11 +41,24 @@ Then visit `http://localhost:8000`.
 - `strategy.html`: editable north star, current season, career story, operating principles and long-term direction.
 - `execution.html`: three daily tasks, weekly focus, X calendar, project kanban, subtasks and done ledger.
 
+## Project Structure
+
+- `src/pages/`: Vite page entry points.
+- `src/core/`: shared browser, storage, backup, date, ID and DOM utilities.
+- `src/models/`: TypeScript data models.
+- `src/features/strategy/`: Strategy page defaults and controller.
+- `src/features/execution/`: Execution page controller.
+- `src/features/settings/`: shared import/export controls.
+- `src/styles/styles.css`: app styling.
+- `public/assets/`: public image assets served by Vite.
+- `data/demo-strategy.json`: generic starter strategy content.
+- `examples/sample-backup.json`: generic backup example.
+
 ## Data Model
 
 Life Compass separates data into three categories:
 
-- Public code: HTML, CSS, JavaScript, layout, components and LocalStorage logic.
+- Public code: HTML, CSS, TypeScript, layout, components and LocalStorage logic.
 - Demo data: generic starter content in `data/demo-strategy.json` and `examples/sample-backup.json`.
 - User data: private content created in the browser and stored in LocalStorage.
 
@@ -54,20 +86,16 @@ Expected public files include:
 - `index.html`
 - `strategy.html`
 - `execution.html`
-- `css/styles.css`
-- `js/app.js`
-- `js/strategy.js`
-- `js/execution.js`
+- `src/`
+- `public/assets/`
 - `data/demo-strategy.json`
 - `examples/sample-backup.json`
+- `package.json`
+- `package-lock.json`
+- `tsconfig.json`
+- `vite.config.ts`
 - `README.md`
 - `.gitignore`
-
-## Assets
-
-- `assets/map-hero.png`: generated cartography image for Strategy.
-- `assets/sail-hero.png`: generated caravel image for Set Sail / Execution.
-- `assets/sail-hero-yacht-original.png`: preserved original yacht-style sailing image.
 
 ## LocalStorage Keys
 

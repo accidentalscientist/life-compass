@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Execution | Life Compass</title>
-    <link rel="stylesheet" href="css/styles.css">
   </head>
   <body data-page="execution">
     <header class="site-header">
@@ -44,7 +43,7 @@
             <p class="eyebrow">Three Daily Tasks</p>
             <h2 id="today-label">Today</h2>
           </div>
-          <button class="icon-button" id="reset-day" type="button" title="Reset daily tasks" aria-label="Reset daily tasks">R</button>
+          <button class="icon-button" id="reset-day" type="button" title="Reset daily tasks" aria-label="Reset daily tasks" data-edit-only>R</button>
         </div>
         <div class="daily-task-list" id="daily-task-list"></div>
       </section>
@@ -76,7 +75,7 @@
             <h2>Ideas to complete</h2>
           </div>
         </div>
-        <form class="inline-add" id="kanban-add-form">
+        <form class="inline-add" id="kanban-add-form" data-edit-only>
           <input id="kanban-add-input" type="text" placeholder="Develop an idea into a project" autocomplete="off">
           <button type="submit">Add</button>
         </form>
@@ -111,7 +110,7 @@
         <div class="modal-heading">
           <div>
             <p class="eyebrow">Project</p>
-            <h2>Edit project</h2>
+            <h2 id="work-modal-title">Project</h2>
           </div>
           <button class="icon-button" type="submit" value="cancel" aria-label="Close work editor">x</button>
         </div>
@@ -127,14 +126,13 @@
           <label>Subtasks <span class="field-hint">Maximum 6. Use one as part of today's three tasks.</span><div class="subtask-editor" id="subtask-editor"></div></label>
         </div>
         <div class="modal-actions">
-          <button class="text-button parking-action" type="button" id="park-project">Move to Parking Lot</button>
+          <button class="text-button parking-action" type="button" id="park-project" data-edit-only>Move to Parking Lot</button>
           <button class="text-button" type="submit" value="cancel">Cancel</button>
-          <button class="primary-button" type="submit" value="save">Save</button>
+          <button class="primary-button" type="submit" value="save" data-edit-only>Save</button>
         </div>
       </form>
     </dialog>
 
-    <script src="js/app.js"></script>
-    <script src="js/execution.js"></script>
+    <script type="module" src="/src/pages/execution.ts"></script>
   </body>
 </html>

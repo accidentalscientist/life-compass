@@ -13,3 +13,12 @@ private/
 # Local planning and tool state
 docs/
 .agents/
+
+# Node/Vite generated files
+node_modules/
+dist/
+
+# Legacy static prototype copies after Vite migration
+/assets/
+/css/
+/js/
