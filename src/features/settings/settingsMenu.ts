@@ -2,6 +2,47 @@ import { exportBackup, importBackup } from "../../core/backup";
 import { loadDemoData } from "../../core/demoData";
 import { applySettings, getSettings, saveSettings } from "../../core/settings";
 
+// A private login for the site owner's own data — kept deliberately small and
+// tucked inside Settings rather than a prominent header nav item. Absent
+// entirely if the Django integration hasn't set these body attributes (e.g.
+// plain `npm run dev` usage of this template outside that deployment).
+function buildAuthControl(): HTMLElement | null {
+  const loginUrl = document.body.dataset.loginUrl;
+  const logoutUrl = document.body.dataset.logoutUrl;
+  if (!loginUrl || !logoutUrl) return null;
+
+  const wrap = document.createElement("div");
+  wrap.className = "settings-auth";
+
+  if (document.body.dataset.authenticated === "true") {
+    const form = document.createElement("form");
+    form.method = "post";
+    form.action = logoutUrl;
+    form.className = "settings-auth-form";
+
+    const csrf = document.createElement("input");
+    csrf.type = "hidden";
+    csrf.name = "csrfmiddlewaretoken";
+    csrf.value = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? "";
+
+    const button = document.createElement("button");
+    button.type = "submit";
+    button.className = "settings-auth-link";
+    button.textContent = "Log out";
+
+    form.append(csrf, button);
+    wrap.append(form);
+  } else {
+    const link = document.createElement("a");
+    link.href = `${loginUrl}?next=${encodeURIComponent(window.location.pathname)}`;
+    link.className = "settings-auth-link";
+    link.textContent = "Log in";
+    wrap.append(link);
+  }
+
+  return wrap;
+}
+
 export function initialiseSettingsMenu(): void {
   const header = document.querySelector(".site-header");
   if (!header) return;
@@ -89,6 +130,10 @@ export function initialiseSettingsMenu(): void {
   });
 
   panel.append(editToggle, exportButton, importLabel, demoButton, note);
+
+  const authControl = buildAuthControl();
+  if (authControl) panel.append(authControl);
+
   wrapper.append(trigger, panel);
   header.append(wrapper);
 }
