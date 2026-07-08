@@ -72,7 +72,12 @@ export function initialiseStrategyPage(): void {
 }
 
 async function loadStrategy(): Promise<Strategy> {
-  const response = await fetch("data/demo-strategy.json");
+  // Falls back to the plain relative path for `npm run dev`/`vite build` usage
+  // outside this deployment. The Django integration sets this explicitly via
+  // `{% static %}`, since its data file doesn't live where Vite's own dev
+  // server or default build output would expect it.
+  const dataUrl = document.body.dataset.demoDataUrl || `${import.meta.env.BASE_URL}data/demo-strategy.json`;
+  const response = await fetch(dataUrl);
   const demoStrategy = response.ok ? ((await response.json()) as Strategy) : fallbackStrategy;
   return mergeStrategy(demoStrategy, loadLocalStrategy());
 }

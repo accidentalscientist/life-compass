@@ -67,6 +67,30 @@ button {
   backdrop-filter: blur(14px);
 }
 
+.site-return {
+  position: absolute;
+  left: clamp(18px, 4vw, 44px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid rgba(216, 208, 194, 0.82);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 248, 0.76);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.site-return:hover {
+  border-color: var(--line);
+  color: var(--navy);
+  background: var(--card);
+}
 .brand {
   display: inline-flex;
   align-items: center;
@@ -1358,6 +1382,13 @@ select:focus {
     align-items: stretch;
   }
 
+
+  .site-return {
+    position: static;
+    transform: none;
+    justify-self: start;
+    width: fit-content;
+  }
   .top-nav {
     display: grid;
     grid-column: auto;
