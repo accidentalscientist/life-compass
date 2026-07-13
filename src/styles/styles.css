@@ -1192,7 +1192,7 @@ select:focus {
   padding: 11px;
 }
 
-.archive-list li {
+.ledger-list li {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;

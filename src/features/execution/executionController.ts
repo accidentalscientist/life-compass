@@ -212,9 +212,20 @@ function saveKanban(): void {
 }
 
 function addLedger(text: string, source: LedgerItem["source"]): void {
-  if (!text.trim()) return;
+  const cleanText = text.trim();
+  if (!cleanText) return;
+
+  // A completion can be re-triggered for the same item on the same day
+  // (e.g. a project re-completing a subtask check); skip the duplicate
+  // rather than logging it twice.
+  const today = toIsoDate(new Date());
+  const alreadyLogged = doneLedger.some(
+    (entry) => entry.text === cleanText && entry.source === source && toIsoDate(new Date(entry.date)) === today
+  );
+  if (alreadyLogged) return;
+
   doneLedger = [
-    { text: text.trim(), source, date: new Date().toISOString() },
+    { text: cleanText, source, date: new Date().toISOString() },
     ...doneLedger
   ];
   setJson(storageKeys.doneLedger, doneLedger);
@@ -291,20 +302,6 @@ function renderDailyTasks(): void {
   dailyTasks.forEach((task, index) => {
     const row = createElement("div", "task-row");
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = task.done;
-    checkbox.setAttribute("aria-label", `Mark task ${index + 1} complete`);
-    checkbox.addEventListener("change", () => {
-      if (checkbox.checked) {
-        completeDailyTask(index);
-        return;
-      }
-      dailyTasks[index].done = false;
-      saveDaily();
-      renderDailyTasks();
-    });
-
     const input = document.createElement("input");
     input.type = "text";
     input.value = task.text;
@@ -328,7 +325,7 @@ function renderDailyTasks(): void {
       completeDailyTask(index);
     });
 
-    row.append(checkbox, input, button);
+    row.append(input, button);
     list.append(row);
   });
 }
@@ -413,7 +410,7 @@ function renderCalendarStats(stats: MonthStats): HTMLElement {
     calendarStat("Month score", `${stats.marked}/${stats.daysInMonth}`),
     calendarStat("Current streak", `${stats.currentStreak}`),
     calendarStat("Best run", `${stats.bestStreak}`),
-    calendarStat("Total Xs", `${stats.totalMarked}`)
+    calendarStat("Needle days", `${stats.totalMarked}`)
   );
   return row;
 }
@@ -533,7 +530,7 @@ function renderMonth(date: Date): HTMLElement {
       dateKey === lastMarkedDateKey ? "is-fresh" : ""
     ].filter(Boolean).join(" ");
     button.textContent = String(day);
-    button.setAttribute("aria-label", `Mark that you moved the needle on ${dateKey}`);
+    button.setAttribute("aria-label", `Mark that you moved the needle on ${dateKey}.`);
     button.addEventListener("click", () => {
       const wasMarked = Boolean(calendar[dateKey]);
       calendar[dateKey] = !wasMarked;
@@ -623,8 +620,7 @@ function renderKanban(): void {
       meta.append(
         pill(formatDate(item.date), "date-pill"),
         pill(item.priority, `priority-pill priority-${item.priority}`),
-        pill(`${countDoneSubtasks(item)}/${item.subtasks.length || 0} done`, "date-pill"),
-        pill(`${item.subtasks.length}/6 subtasks`, "date-pill")
+        pill(remainingLabel(item), "date-pill")
       );
       const description = createElement("p", "", item.description || "No description yet.");
       const progress = renderProjectProgress(item);
@@ -661,6 +657,14 @@ function pill(text: string, className: string): HTMLSpanElement {
 
 function countDoneSubtasks(item: KanbanItem): number {
   return item.subtasks.filter((subtask) => subtask.done).length;
+}
+
+function remainingLabel(item: KanbanItem): string {
+  const total = item.subtasks.length;
+  if (!total) return "No tasks yet";
+  const remaining = total - countDoneSubtasks(item);
+  if (remaining === 0) return "All done";
+  return `${remaining} task${remaining === 1 ? "" : "s"} left`;
 }
 
 function renderProjectProgress(item: KanbanItem): HTMLElement {

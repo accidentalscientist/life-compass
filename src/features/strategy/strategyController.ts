@@ -149,7 +149,6 @@ function renderList(id: string, items: string[]): void {
 function renderRuleCard(rule: OperatingRule, mode: "summary" | "full"): HTMLElement {
   const card = createElement("article", "rule-card");
   card.append(
-    createElement("span", "rule-number", rule.number),
     createElement("h3", "", rule.name),
     createElement("p", "", mode === "full" ? rule.text : rule.summary)
   );
@@ -160,7 +159,6 @@ function renderRuleEditor(rule: OperatingRule, index: number): HTMLElement {
   const card = createElement("article", "rule-card rule-editor");
   card.dataset.index = String(index);
   card.append(
-    renderRuleInput("number", "#", rule.number),
     renderRuleInput("name", "Title", rule.name),
     renderRuleInput("summary", "Summary", rule.summary),
     renderRuleInput("text", "Full description", rule.text, "textarea")
