@@ -740,17 +740,11 @@ label,
 
 .task-row {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   min-height: 58px;
   padding: 10px;
-}
-
-.task-row input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
-  accent-color: var(--green);
 }
 
 input[type="text"],
@@ -1487,11 +1481,7 @@ select:focus {
   }
 
   .task-row {
-    grid-template-columns: 30px minmax(0, 1fr);
-  }
-
-  .complete-button {
-    grid-column: 2;
+    grid-template-columns: 1fr;
   }
 
   .inline-add {
