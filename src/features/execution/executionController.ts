@@ -42,6 +42,7 @@ let dragSource: SelectedWork | null = null;
 let visibleCalendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 let lastMarkedDateKey = "";
 let celebrationTimer: number | undefined;
+let pickerTargetIndex: number | null = null;
 
 export function initialiseExecutionPage(): void {
   byId("today-label").textContent = today.toLocaleDateString(undefined, {
@@ -174,7 +175,8 @@ function normalizeSubtask(subtask: string | Partial<Subtask>): Subtask {
   return {
     id: subtask.id || makeId(),
     text: subtask.text || "",
-    done: Boolean(subtask.done)
+    done: Boolean(subtask.done),
+    completedAt: subtask.completedAt
   };
 }
 
@@ -211,7 +213,7 @@ function saveKanban(): void {
   setJson(storageKeys.parkingLot, kanban["Parking Lot"]);
 }
 
-function addLedger(text: string, source: LedgerItem["source"]): void {
+function addLedger(text: string, source: LedgerItem["source"], projectId?: string): void {
   const cleanText = text.trim();
   if (!cleanText) return;
 
@@ -225,7 +227,7 @@ function addLedger(text: string, source: LedgerItem["source"]): void {
   if (alreadyLogged) return;
 
   doneLedger = [
-    { text: cleanText, source, date: new Date().toISOString() },
+    { text: cleanText, source, date: new Date().toISOString(), projectId },
     ...doneLedger
   ];
   setJson(storageKeys.doneLedger, doneLedger);
@@ -251,6 +253,88 @@ function addTaskToDaily(text: string, projectId: string, subtaskId: string): boo
   return true;
 }
 
+// Daily tasks are picked from what's already tracked in Projects, not typed
+// freely — this is the picker that backs each daily-task slot.
+function openTaskPicker(index: number): void {
+  pickerTargetIndex = index;
+  const search = byId<HTMLInputElement>("task-picker-search");
+  search.value = "";
+  renderTaskPickerList("");
+  byId<HTMLButtonElement>("clear-task-picker").hidden = !dailyTasks[index].text.trim();
+  byId<HTMLDialogElement>("task-picker-modal").showModal();
+  search.focus();
+}
+
+function closeTaskPicker(): void {
+  pickerTargetIndex = null;
+  byId<HTMLDialogElement>("task-picker-modal").close();
+}
+
+function candidateSubtasks(): Array<{ project: KanbanItem; subtask: Subtask }> {
+  const assignedElsewhere = new Set(
+    dailyTasks
+      .filter((_, index) => index !== pickerTargetIndex)
+      .map((task) => task.subtaskId)
+      .filter((id): id is string => Boolean(id))
+  );
+  const candidates: Array<{ project: KanbanItem; subtask: Subtask }> = [];
+  kanban["This Week"].forEach((project) => {
+    project.subtasks.forEach((subtask) => {
+      if (subtask.done || assignedElsewhere.has(subtask.id)) return;
+      candidates.push({ project, subtask });
+    });
+  });
+  return candidates;
+}
+
+function renderTaskPickerList(filterText: string): void {
+  const list = byId("task-picker-list");
+  list.replaceChildren();
+  const query = filterText.trim().toLowerCase();
+  const candidates = candidateSubtasks().filter(
+    ({ subtask, project }) => !query || subtask.text.toLowerCase().includes(query) || project.title.toLowerCase().includes(query)
+  );
+
+  if (!candidates.length) {
+    list.append(createElement("li", "empty-note", "No open tasks match. Add subtasks to a This Week project first."));
+    return;
+  }
+
+  candidates.forEach(({ project, subtask }) => {
+    const row = document.createElement("li");
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = "task-picker-option";
+    option.append(
+      createElement("span", "", subtask.text || "Untitled subtask"),
+      createElement("span", "project-pill", project.title)
+    );
+    option.addEventListener("click", () => {
+      if (pickerTargetIndex === null) return;
+      assignDailyTask(pickerTargetIndex, subtask.text, project.id, subtask.id);
+      closeTaskPicker();
+    });
+    row.append(option);
+    list.append(row);
+  });
+}
+
+function assignDailyTask(index: number, text: string, projectId: string, subtaskId: string): void {
+  dailyTasks[index].text = text.trim();
+  dailyTasks[index].done = false;
+  dailyTasks[index].projectId = projectId;
+  dailyTasks[index].subtaskId = subtaskId;
+  saveDaily();
+  renderDailyTasks();
+  showStatusToast("Added to today's three.");
+}
+
+function clearDailyTask(index: number): void {
+  dailyTasks[index] = { text: "", done: false, projectId: null, subtaskId: null };
+  saveDaily();
+  renderDailyTasks();
+}
+
 function completeDailyTask(index: number): void {
   if (dailyTasks[index].done) return;
   dailyTasks[index].done = true;
@@ -260,7 +344,19 @@ function completeDailyTask(index: number): void {
     completeLinkedSubtask(dailyTasks[index].projectId, dailyTasks[index].subtaskId);
   }
   renderDailyTasks();
+  autoMarkToday();
   showStatusToast("Daily task completed.");
+}
+
+/** The calendar mark is earned, never manually toggled — completing any one
+ * of today's three tasks is what moves the needle. */
+function autoMarkToday(): void {
+  if (calendar[isoDate]) return;
+  calendar[isoDate] = true;
+  setJson(storageKeys.calendar, calendar);
+  lastMarkedDateKey = isoDate;
+  renderCalendar();
+  showCalendarCelebration(isoDate);
 }
 
 function findProject(projectId: string): ProjectLookup | null {
@@ -277,6 +373,7 @@ function completeLinkedSubtask(projectId: string, subtaskId: string): void {
   const subtask = found.item.subtasks.find((item) => item.id === subtaskId);
   if (!subtask) return;
   subtask.done = true;
+  subtask.completedAt = new Date().toISOString();
   maybeCompleteProject(found);
   saveKanban();
   renderKanban();
@@ -290,7 +387,7 @@ function maybeCompleteProject(found: ProjectLookup | null): void {
   if (!found.item.subtasks.every((subtask) => subtask.done)) return;
   const [project] = kanban[found.column].splice(found.index, 1);
   kanban.Complete.push(project);
-  addLedger(project.title, "Project");
+  addLedger(project.title, "Project", project.id);
   showStatusToast("Project completed. All subtasks are done.");
 }
 
@@ -302,30 +399,24 @@ function renderDailyTasks(): void {
   dailyTasks.forEach((task, index) => {
     const row = createElement("div", "task-row");
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = task.text;
-    input.placeholder = `Task ${index + 1}`;
-    input.autocomplete = "off";
-    input.readOnly = !editing;
-    input.addEventListener("input", () => {
-      if (!editing) return;
-      dailyTasks[index].text = input.value;
-      dailyTasks[index].projectId = null;
-      dailyTasks[index].subtaskId = null;
-      saveDaily();
-    });
+    const picker = document.createElement("button");
+    picker.type = "button";
+    picker.className = "task-picker-trigger";
+    if (!task.text.trim()) picker.classList.add("is-empty");
+    picker.textContent = task.text.trim() || `Pick task ${index + 1}…`;
+    picker.disabled = !editing || task.done;
+    picker.addEventListener("click", () => openTaskPicker(index));
 
     const button = document.createElement("button");
     button.type = "button";
     button.className = "complete-button";
     button.textContent = task.done ? "Done" : "Complete";
-    button.disabled = task.done;
+    button.disabled = task.done || !task.text.trim();
     button.addEventListener("click", () => {
       completeDailyTask(index);
     });
 
-    row.append(input, button);
+    row.append(picker, button);
     list.append(row);
   });
 }
@@ -521,26 +612,17 @@ function renderMonth(date: Date): HTMLElement {
   for (let day = 1; day <= daysInMonth; day += 1) {
     const cellDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
     const dateKey = toIsoDate(cellDate);
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = [
+    const marked = Boolean(calendar[dateKey]);
+    const cell = createElement("div", [
       "day-cell",
-      calendar[dateKey] ? "is-marked" : "",
+      marked ? "is-marked" : "",
       dateKey === isoDate ? "is-today" : "",
       dateKey === lastMarkedDateKey ? "is-fresh" : ""
-    ].filter(Boolean).join(" ");
-    button.textContent = String(day);
-    button.setAttribute("aria-label", `Mark that you moved the needle on ${dateKey}.`);
-    button.addEventListener("click", () => {
-      const wasMarked = Boolean(calendar[dateKey]);
-      calendar[dateKey] = !wasMarked;
-      if (!calendar[dateKey]) delete calendar[dateKey];
-      setJson(storageKeys.calendar, calendar);
-      lastMarkedDateKey = wasMarked ? "" : dateKey;
-      renderCalendar();
-      if (!wasMarked) showCalendarCelebration(dateKey);
-    });
-    grid.append(button);
+    ].filter(Boolean).join(" "), String(day));
+    cell.title = marked
+      ? `Needle moved on ${dateKey} — a daily task was completed.`
+      : `No task completed yet on ${dateKey}.`;
+    grid.append(cell);
   }
 
   month.append(heading, grid);
@@ -697,7 +779,7 @@ function moveProject(fromColumn: KanbanColumn, fromIndex: number, toColumn: Kanb
   const [item] = kanban[fromColumn].splice(fromIndex, 1);
   kanban[toColumn].push(item);
   if (toColumn === "Complete") {
-    addLedger(item.title, "Project");
+    addLedger(item.title, "Project", item.id);
     showStatusToast("Project moved to Complete.");
   }
   if (toColumn === "Parking Lot") showStatusToast("Project moved to Parking Lot.");
@@ -790,35 +872,66 @@ function renderLedger(): void {
   const archive = byId("ledger-archive");
   ledger.replaceChildren();
   archive.replaceChildren();
-  if (!doneLedger.length) {
-    const empty = createElement("li", "empty-note", "Nothing completed yet.");
+
+  // The ledger also logs daily-task completions (needed for streaks
+  // elsewhere), but this view is specifically the record of finished
+  // projects — daily tasks stay out of it.
+  const projectEntries = doneLedger
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => item.source === "Project");
+
+  if (!projectEntries.length) {
+    const empty = createElement("li", "empty-note", "No projects completed yet.");
     ledger.append(empty);
     archive.append(empty.cloneNode(true));
     return;
   }
 
-  doneLedger.slice(0, 4).forEach((item, index) => {
+  projectEntries.slice(0, 4).forEach(({ item, index }) => {
     ledger.append(renderLedgerItem(item, index, false));
   });
 
-  doneLedger.forEach((item, index) => {
+  projectEntries.forEach(({ item, index }) => {
     archive.append(renderLedgerItem(item, index, true));
   });
 }
 
-function renderLedgerItem(item: LedgerItem, index: number, canDelete: boolean): HTMLLIElement {
-  const row = document.createElement("li");
-  const content = document.createElement("div");
-  const date = new Date(item.date).toLocaleString(undefined, {
+function formatLedgerDate(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit"
   });
-  content.textContent = item.text;
-  const meta = createElement("span", "ledger-meta", `${item.source} - ${date}`);
-  content.append(meta);
-  row.append(content);
+}
+
+function renderLedgerItem(item: LedgerItem, index: number, canDelete: boolean): HTMLLIElement {
+  const row = document.createElement("li");
+
+  const details = document.createElement("details");
+  details.className = "ledger-entry";
+  const summary = document.createElement("summary");
+  summary.textContent = item.text;
+  summary.append(createElement("span", "ledger-meta", `${item.source} - ${formatLedgerDate(item.date)}`));
+  details.append(summary);
+
+  const project = item.projectId ? findProject(item.projectId) : null;
+  if (project && project.item.subtasks.length) {
+    const list = createElement("ul", "ledger-subtasks");
+    project.item.subtasks.forEach((subtask) => {
+      const subtaskRow = createElement("li", subtask.done ? "is-complete" : "", subtask.text || "Untitled subtask");
+      subtaskRow.append(createElement(
+        "span",
+        "ledger-meta",
+        subtask.completedAt ? formatLedgerDate(subtask.completedAt) : "Not completed"
+      ));
+      list.append(subtaskRow);
+    });
+    details.append(list);
+  } else {
+    details.append(createElement("p", "empty-note", "No subtask details recorded for this project."));
+  }
+  row.append(details);
 
   if (canDelete) {
     const button = document.createElement("button");
@@ -843,6 +956,16 @@ function bindEvents(): void {
     saveDaily();
     renderDailyTasks();
     renderSubtasks();
+  });
+
+  byId<HTMLInputElement>("task-picker-search").addEventListener("input", (event) => {
+    renderTaskPickerList((event.target as HTMLInputElement).value);
+  });
+  byId("close-task-picker").addEventListener("click", closeTaskPicker);
+  byId("clear-task-picker").addEventListener("click", () => {
+    if (pickerTargetIndex === null) return;
+    clearDailyTask(pickerTargetIndex);
+    closeTaskPicker();
   });
 
   byId<HTMLFormElement>("kanban-add-form").addEventListener("submit", (event) => {

@@ -94,6 +94,21 @@
       </section>
     </main>
 
+    <dialog class="modal" id="task-picker-modal">
+      <div class="modal-heading">
+        <div>
+          <p class="eyebrow">This Week</p>
+          <h2>Pick today's task</h2>
+        </div>
+        <button class="icon-button" type="button" id="close-task-picker" aria-label="Close task picker">x</button>
+      </div>
+      <input type="text" id="task-picker-search" placeholder="Search open tasks..." autocomplete="off">
+      <ul class="task-picker-list" id="task-picker-list"></ul>
+      <div class="modal-actions">
+        <button class="text-button" type="button" id="clear-task-picker">Clear this slot</button>
+      </div>
+    </dialog>
+
     <dialog class="modal" id="ledger-modal">
       <div class="modal-heading">
         <div>

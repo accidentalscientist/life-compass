@@ -747,6 +747,77 @@ label,
   padding: 10px;
 }
 
+.task-picker-trigger {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fffefa;
+  color: var(--ink);
+  padding: 9px 11px;
+  text-align: left;
+  font-weight: 700;
+}
+
+.task-picker-trigger.is-empty {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.task-picker-trigger:not(:disabled):hover {
+  border-color: rgba(47, 111, 159, 0.4);
+}
+
+.task-picker-trigger:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+#task-picker-search {
+  margin: 4px 0 12px;
+}
+
+.task-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.task-picker-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  text-align: left;
+  font-weight: 700;
+}
+
+.task-picker-option:hover {
+  border-color: rgba(47, 111, 159, 0.4);
+  background: rgba(47, 111, 159, 0.06);
+}
+
+.project-pill {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(47, 111, 159, 0.1);
+  color: var(--blue);
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 input[type="text"],
 input[type="date"],
 textarea,
@@ -908,12 +979,6 @@ select:focus {
   font-size: 0.82rem;
   font-weight: 800;
   transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
-}
-
-.day-cell:not(.is-empty):hover {
-  transform: translateY(-1px);
-  border-color: rgba(185, 74, 72, 0.42);
-  box-shadow: 0 8px 18px rgba(20, 33, 61, 0.08);
 }
 
 .day-cell.is-empty {
@@ -1219,7 +1284,7 @@ select:focus {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
-  align-items: center;
+  align-items: start;
 }
 
 .ledger-meta {
@@ -1228,6 +1293,48 @@ select:focus {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.ledger-entry summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.ledger-entry summary::-webkit-details-marker {
+  display: none;
+}
+
+.ledger-entry summary::before {
+  content: "▸";
+  display: inline-block;
+  width: 12px;
+  margin-right: 6px;
+  color: var(--muted);
+  transition: transform 120ms ease;
+}
+
+.ledger-entry[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.ledger-subtasks {
+  list-style: none;
+  margin: 10px 0 0 18px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.ledger-subtasks li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.ledger-subtasks li.is-complete {
+  color: var(--ink);
 }
 
 .parking-list li {

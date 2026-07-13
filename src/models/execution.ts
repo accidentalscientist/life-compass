@@ -17,6 +17,7 @@ export interface Subtask {
   id: string;
   text: string;
   done: boolean;
+  completedAt?: string;
 }
 
 export interface KanbanItem {
@@ -36,6 +37,7 @@ export interface LedgerItem {
   text: string;
   source: "Daily task" | "Project" | "Completed task" | string;
   date: string;
+  projectId?: string;
 }
 
 export type CalendarMarks = Record<string, boolean>;
