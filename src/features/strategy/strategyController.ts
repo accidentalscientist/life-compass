@@ -1,6 +1,6 @@
 import { createElement, setText, byId } from "../../core/dom";
 import { getJson, setJson, storageKeys } from "../../core/storage";
-import type { OperatingRule, Strategy } from "../../models/strategy";
+import type { CompassItem, OperatingRule, Strategy } from "../../models/strategy";
 import { fallbackStrategy } from "./strategyDefaults";
 
 type FieldType = "text" | "textarea" | "list" | "pairs";
@@ -146,6 +146,12 @@ function renderList(id: string, items: string[]): void {
   list.replaceChildren(...items.map((item) => createElement("li", "", item)));
 }
 
+function renderCompassCard(item: CompassItem): HTMLElement {
+  const card = createElement("article", "compass-item");
+  card.append(createElement("h3", "", item.label), createElement("p", "", item.text));
+  return card;
+}
+
 function renderRuleCard(rule: OperatingRule, mode: "summary" | "full"): HTMLElement {
   const card = createElement("article", "rule-card");
   card.append(
@@ -188,12 +194,10 @@ function renderStrategy(): void {
   setText("career-story-body", strategy.careerStory.body);
 
   const compass = byId("career-compass");
-  const compassItems = strategy.careerCompass.items.map((item) => {
-    const card = createElement("article", "compass-item");
-    card.append(createElement("h3", "", item.label), createElement("p", "", item.text));
-    return card;
-  });
-  compass.replaceChildren(...compassItems);
+  compass.replaceChildren(...strategy.careerCompass.items.map(renderCompassCard));
+
+  const compassGrid = byId("compass-grid");
+  compassGrid.replaceChildren(...strategy.careerCompass.items.map(renderCompassCard));
 
   const tags = byId("season-tags");
   tags.replaceChildren(...strategy.season.tags.map((tag) => createElement("span", "", tag)));
@@ -277,6 +281,13 @@ function bindEvents(): void {
   byId("open-rules").addEventListener("click", () => {
     byId<HTMLDialogElement>("rules-modal").showModal();
   });
+
+  byId("open-compass").addEventListener("click", () => {
+    byId<HTMLDialogElement>("compass-modal").showModal();
+  });
+  const closeCompass = () => byId<HTMLDialogElement>("compass-modal").close();
+  byId("close-compass").addEventListener("click", closeCompass);
+  byId("close-compass-secondary").addEventListener("click", closeCompass);
 
   byId<HTMLFormElement>("strategy-edit-form").addEventListener("submit", (event) => {
     if ((event.submitter as HTMLButtonElement | null)?.value !== "save") return;

@@ -45,7 +45,10 @@
               <p class="eyebrow">Career Compass</p>
               <h2 id="compass-title"></h2>
             </div>
-            <button class="text-button" type="button" data-edit-section="careerCompass" data-edit-only>Edit</button>
+            <div class="button-pair">
+              <button class="text-button" type="button" id="open-compass">View all</button>
+              <button class="text-button" type="button" data-edit-section="careerCompass" data-edit-only>Edit</button>
+            </div>
           </div>
           <div class="compass-list" id="career-compass"></div>
         </article>
@@ -102,6 +105,20 @@
         <div class="tag-row" id="season-tags"></div>
       </section>
     </main>
+
+    <dialog class="modal wide-modal" id="compass-modal">
+      <div class="modal-heading">
+        <div>
+          <p class="eyebrow">Career Compass</p>
+          <h2>Meaningful career direction</h2>
+        </div>
+        <button class="icon-button" type="button" id="close-compass" aria-label="Close career compass">x</button>
+      </div>
+      <div class="compass-grid" id="compass-grid"></div>
+      <div class="modal-actions">
+        <button class="text-button" type="button" id="close-compass-secondary">Close</button>
+      </div>
+    </dialog>
 
     <dialog class="modal wide-modal" id="rules-modal">
       <form method="dialog" id="rules-form">

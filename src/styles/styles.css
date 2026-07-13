@@ -7,6 +7,7 @@
   --blue: #2f6f9f;
   --red: #b94a48;
   --green: #4f7f52;
+  --parking: #9a9186;
   --line: #d8d0c2;
   --shadow: 0 18px 45px rgba(20, 33, 61, 0.08);
   --radius: 8px;
@@ -543,8 +544,20 @@ label,
   font-weight: 800;
 }
 
-.rules-grid {
+.rules-grid,
+.compass-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.compass-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.compass-grid .compass-item {
+  min-height: 148px;
+  padding: 18px;
 }
 
 .rule-card {
@@ -1011,10 +1024,16 @@ select:focus {
 .kanban-column {
   min-width: 230px;
   border: 1px solid var(--line);
+  border-top: 3px solid var(--line);
   border-radius: var(--radius);
   background: rgba(247, 242, 232, 0.55);
   padding: 10px;
 }
+
+.kanban-column[data-column="Ideas"] { border-top-color: var(--blue); }
+.kanban-column[data-column="This Week"] { border-top-color: var(--red); }
+.kanban-column[data-column="Complete"] { border-top-color: var(--green); }
+.kanban-column[data-column="Parking Lot"] { border-top-color: var(--parking); }
 
 .kanban-column.is-drag-over {
   border-color: var(--blue);
@@ -1046,6 +1065,9 @@ select:focus {
   display: grid;
   gap: 9px;
   min-height: 120px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .kanban-card {
@@ -1054,6 +1076,13 @@ select:focus {
   cursor: pointer;
   transition: transform 140ms ease, box-shadow 140ms ease;
 }
+
+/* Column identity — a quiet colour language for where a project sits in its
+   lifecycle, not just its priority. */
+.kanban-column[data-column="Ideas"] .kanban-card { border-left-color: var(--blue); }
+.kanban-column[data-column="This Week"] .kanban-card { border-left-color: var(--red); }
+.kanban-column[data-column="Complete"] .kanban-card { border-left-color: var(--green); }
+.kanban-column[data-column="Parking Lot"] .kanban-card { border-left-color: var(--parking); }
 
 .kanban-card:hover,
 .kanban-card:focus {
